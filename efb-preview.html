@@ -1,0 +1,1002 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EFB Preview</title>
+<style>
+:root {
+  --font: Inter, Roboto, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  --mono: "JetBrains Mono", "DejaVu Sans Mono", Consolas, monospace;
+  --page: #121417;
+  --doc: #1b1e22;
+  --head: #2a2d31;
+  --body: #222529;
+  --border: #363a3f;
+  --text: #e7e9eb;
+  --muted: #9aa0a7;
+  --blue: #2c9ff2;
+  --green: #3ec43e;
+  --amber: #f5a623;
+  --red: #ff4141;
+  --cyan: #19d3ee;
+  --white: #f4f4f4;
+  --bar: #0d0f11;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; }
+body { background: var(--page); color: var(--text); font: 14px/1.45 var(--font); display: flex; flex-direction: column; overflow: hidden; }
+button { font: inherit; }
+
+/* ---------- toolbar ---------- */
+.tb { background: var(--bar); border-bottom: 1px solid #23262a; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; padding: 8px 16px; flex: none; }
+.tb-brand { font-weight: 700; letter-spacing: .04em; font-size: 13px; color: var(--white); margin-right: 4px; }
+.tb-group { display: flex; align-items: center; gap: 6px; }
+.tb label { color: var(--muted); font-size: 12px; }
+.tb-btn, .tb select { background: #1f2226; color: var(--text); border: 1px solid #353a40; border-radius: 4px; padding: 5px 10px; font-size: 12.5px; cursor: pointer; }
+.tb-btn:hover, .tb select:hover { border-color: #4d535a; background: #262a2f; }
+.tb-btn:focus-visible, .tb select:focus-visible { outline: 2px solid var(--blue); outline-offset: 1px; }
+.tb-btn.warn { color: var(--amber); border-color: #5a4520; }
+.tb-status { margin-left: auto; font-size: 12px; color: var(--muted); display: flex; align-items: center; gap: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+.dot { width: 8px; height: 8px; border-radius: 50%; background: #555; flex: none; }
+.dot.live { background: var(--green); box-shadow: 0 0 6px var(--green); }
+.dot.flash { animation: flash .6s ease-out; }
+@keyframes flash { from { background: var(--cyan); box-shadow: 0 0 10px var(--cyan); } }
+
+/* ---------- layout ---------- */
+.wrap { flex: 1; display: flex; min-height: 0; }
+#efbp-main { flex: 1; overflow: auto; min-width: 0; }
+#efbp-doc { max-width: 920px; margin: 20px auto 60px; padding: 18px 20px 24px; background: var(--doc); border: 1px solid #24272b; border-radius: 4px; min-height: 200px; }
+#efbp-toc { width: 230px; flex: none; overflow: auto; border-left: 1px solid #23262a; padding: 20px 14px; font-size: 12.5px; background: #15171a; }
+#efbp-toc h2 { font-size: 11px; letter-spacing: .1em; color: var(--muted); margin: 0 0 10px; font-weight: 600; }
+#efbp-toc a { display: block; color: #c7cbd0; text-decoration: none; padding: 3px 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#efbp-toc a:hover { color: var(--white); }
+@media (max-width: 1100px) { #efbp-toc { display: none; } }
+@media (max-width: 640px) {
+  .tb { padding: 8px 12px; }
+  #efbp-doc { margin: 0; border: 0; border-radius: 0; padding: 14px 16px 30px; }
+  .tb-status { margin-left: 0; width: 100%; }
+}
+
+/* ---------- document content ---------- */
+.doc h1, .doc h2, .doc h3, .doc h4, .doc h5, .doc h6 { color: var(--white); font-weight: 600; margin: 16px 0 8px; line-height: 1.25; scroll-margin-top: 12px; }
+.doc h1 { font-size: 19px; }
+.doc h2 { font-size: 16.5px; }
+.doc h3 { font-size: 15px; }
+.doc h4, .doc h5, .doc h6 { font-size: 14px; }
+.doc > :first-child { margin-top: 0; }
+.doc p { margin: 8px 0; }
+.doc a { color: var(--cyan); }
+.doc code { font-family: var(--mono); font-size: 12.5px; background: #2a2d31; padding: 1px 5px; border-radius: 3px; }
+.doc pre { background: #131518; border: 1px solid var(--border); border-radius: 3px; padding: 10px 12px; overflow: auto; }
+.doc pre code { background: none; padding: 0; }
+.doc blockquote { margin: 8px 0; padding: 2px 0 2px 12px; border-left: 3px solid #4a4f55; color: #c9cdd2; }
+.doc ul, .doc ol { margin: 6px 0; padding-left: 24px; }
+.doc mark { background: rgba(245,166,35,.32); color: inherit; padding: 0 2px; border-radius: 2px; }
+.doc hr { border: 0; border-top: 1px solid var(--border); margin: 14px 0; }
+.doc table { border-collapse: collapse; margin: 10px 0; width: 100%; font-size: 13px; }
+.doc th, .doc td { border: 1px solid #3a3e44; padding: 6px 9px; vertical-align: top; }
+.doc th { background: var(--head); color: var(--white); font-weight: 600; text-align: left; }
+.doc img { max-width: 100%; }
+.img-alt { color: var(--muted); font-style: italic; }
+.doc .c-amber { color: var(--amber); }
+.doc .c-red { color: var(--red); }
+.doc .c-green { color: var(--green); }
+.doc .c-cyan { color: var(--cyan); }
+.center { text-align: center; }
+.flash-target { animation: target 1.6s ease-out; }
+@keyframes target { from { background: rgba(44,159,242,.35); } }
+
+/* collapsible section */
+.col { border: 1px solid var(--border); border-radius: 3px; margin: 8px 0; background: var(--body); }
+.col-head { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 12px; background: var(--head); color: var(--white); border: 0; border-radius: 3px; cursor: pointer; font-weight: 600; font-size: 13px; text-align: left; }
+.col.open > .col-head { border-radius: 3px 3px 0 0; }
+.col-head:focus-visible { outline: 2px solid var(--blue); outline-offset: -2px; }
+.tri { width: 0; height: 0; border-left: 7px solid transparent; border-right: 7px solid transparent; border-top: 8px solid var(--white); flex: none; }
+.col.open > .col-head .tri { border-top: 0; border-bottom: 8px solid var(--white); }
+.col-body { padding: 10px 12px 12px; }
+.col:not(.open) > .col-body { display: none; }
+
+/* checklist items */
+.cl { margin: 6px 0; }
+.item { display: flex; align-items: baseline; color: var(--blue); cursor: pointer; padding: 3px 0; font-size: 13px; user-select: none; border-radius: 2px; }
+.item:hover { background: rgba(255,255,255,.03); }
+.item:focus-visible { outline: 2px solid var(--blue); outline-offset: 1px; }
+.i-name { flex: 0 1 auto; }
+.i-colon { display: none; }
+.i-dots { flex: 1 1 auto; min-width: 18px; height: 0; border-bottom: 2px dotted currentColor; margin: 0 6px; align-self: baseline; transform: translateY(-3px); opacity: .9; }
+.i-resp { flex: 0 1 auto; text-align: right; }
+.item.checked { color: var(--green); }
+.cl.normal .item.checked, .item.table-item.checked { justify-content: flex-start; }
+.cl.normal .item.checked .i-dots, .item.table-item.checked .i-dots { display: none; }
+.cl.normal .item.checked .i-colon, .item.table-item.checked .i-colon { display: inline; }
+.cl.normal .item.checked .i-resp, .item.table-item.checked .i-resp { margin-left: .35em; text-align: left; }
+.cl-label { color: var(--white); font-size: 12px; font-weight: 600; letter-spacing: .03em; margin: 10px 0 2px; }
+.cl-label:first-child { margin-top: 0; }
+.complete { display: block; width: 100%; margin-top: 10px; padding: 8px; background: var(--head); color: var(--white); border: 1px solid #3d4146; border-radius: 3px; font-size: 12px; font-weight: 700; letter-spacing: .09em; cursor: pointer; }
+.complete:hover { background: #33363b; }
+.complete:focus-visible { outline: 2px solid var(--blue); outline-offset: 1px; }
+h1.has-complete { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+h1.has-complete .complete { width: auto; margin: 0; padding: 6px 14px; flex: none; }
+.cltable td, .cltable th { width: 50%; }
+.cltable .item { padding: 0; }
+
+/* conditional branch */
+.br { margin: 6px 0 10px; }
+.br-head { display: flex; align-items: center; gap: 8px; background: none; border: 0; color: var(--white); font-weight: 700; font-size: 13px; cursor: pointer; padding: 2px 0; text-align: left; }
+.br-head:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+.br-mark { width: 15px; height: 15px; border-radius: 50%; background: var(--blue); display: grid; place-items: center; flex: none; }
+.br.lvl2 > .br-head .br-mark { border-radius: 2px; }
+.br-tri { width: 0; height: 0; border-left: 4px solid transparent; border-right: 4px solid transparent; border-top: 5px solid var(--doc); }
+.br.open > .br-head .br-tri { border-top: 0; border-bottom: 5px solid var(--doc); }
+.br-body { margin-left: 7px; border-left: 1.5px solid var(--blue); padding: 4px 0 14px 16px; position: relative; }
+.br-body::after { content: ""; position: absolute; left: -1.5px; bottom: 0; width: 70px; border-bottom: 1.5px solid var(--blue); }
+.br:not(.open) > .br-body { display: none; }
+.br.followed > .br-head .br-mark { background: var(--white); }
+.br.followed > .br-body, .br.followed > .br-body::after { border-color: var(--white); }
+.br-body > p { font-size: 13px; }
+
+/* error / welcome */
+.err { border: 1px solid #5c2a2a; background: #2a1b1b; border-radius: 4px; padding: 16px 18px; }
+.err h2 { color: var(--red); font-size: 16px; margin: 0 0 8px; }
+.err pre { white-space: pre-wrap; margin: 0; font-family: var(--mono); font-size: 12.5px; color: #f1d3d3; }
+.welcome h1 { font-size: 20px; color: var(--white); margin: 0 0 6px; }
+.welcome p, .welcome li { color: #c9cdd2; }
+.welcome pre { background: #131518; border: 1px solid var(--border); border-radius: 3px; padding: 10px 12px; font-family: var(--mono); font-size: 12.5px; overflow: auto; }
+.welcome .tb-btn { font-size: 13px; padding: 7px 14px; }
+
+/* problems drawer */
+#efbp-problems { position: fixed; right: 16px; bottom: 16px; width: min(520px, calc(100vw - 32px)); max-height: 45vh; overflow: auto; background: #17191c; border: 1px solid #3a3e44; border-radius: 6px; box-shadow: 0 10px 30px rgba(0,0,0,.5); padding: 12px 14px; font-size: 12.5px; z-index: 5; }
+#efbp-problems h2 { font-size: 12px; letter-spacing: .08em; color: var(--muted); margin: 0 0 8px; display: flex; justify-content: space-between; align-items: center; }
+#efbp-problems ul { margin: 0; padding: 0; list-style: none; }
+#efbp-problems li { padding: 5px 0; border-top: 1px solid #26292d; display: flex; gap: 10px; }
+#efbp-problems .ln { color: var(--muted); font-family: var(--mono); flex: none; min-width: 48px; }
+#efbp-problems .warn { color: var(--amber); }
+#efbp-problems .info { color: var(--cyan); }
+#efbp-toast { position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%); background: #26292e; border: 1px solid #40454b; color: var(--white); padding: 8px 14px; border-radius: 4px; font-size: 13px; z-index: 6; max-width: calc(100vw - 32px); }
+.drop-hint { position: fixed; inset: 0; background: rgba(44,159,242,.12); border: 3px dashed var(--blue); display: grid; place-items: center; font-size: 18px; color: var(--white); z-index: 7; pointer-events: none; }
+[hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<header class="tb">
+  <span class="tb-brand">EFB PREVIEW</span>
+  <div class="tb-group">
+    <button class="tb-btn" id="efbp-open-file" type="button">Open file</button>
+    <button class="tb-btn" id="efbp-open-dir" type="button">Open folder</button>
+    <select id="efbp-docs" hidden aria-label="Document"></select>
+  </div>
+  <div class="tb-group">
+    <label for="efbp-ac">Aircraft</label>
+    <select id="efbp-ac"><option>A319</option><option selected>A320</option><option>A321</option></select>
+    <label for="efbp-eng">Engines</label>
+    <select id="efbp-eng"><option value="Cfm56">CFM56</option><option value="IaeV2500">IAE V2500</option></select>
+  </div>
+  <div class="tb-group">
+    <button class="tb-btn" id="efbp-expand" type="button">Expand all</button>
+    <button class="tb-btn" id="efbp-collapse" type="button">Collapse all</button>
+    <button class="tb-btn" id="efbp-reset" type="button">Reset checks</button>
+    <button class="tb-btn" id="efbp-probs" type="button" hidden>Problems</button>
+  </div>
+  <div class="tb-status" id="efbp-status"><span class="dot" id="efbp-dot"></span><span id="efbp-status-text">No document</span></div>
+</header>
+<div class="wrap">
+  <main id="efbp-main"><div id="efbp-doc"></div></main>
+  <aside id="efbp-toc" hidden></aside>
+</div>
+<div id="efbp-problems" hidden></div>
+<div id="efbp-toast" hidden></div>
+<div class="drop-hint" id="efbp-drop" hidden>Drop a .md file or a documents folder</div>
+<input type="file" id="efbp-file-input" accept=".md,text/markdown,text/plain" hidden>
+<input type="file" id="efbp-dir-input" webkitdirectory hidden>
+
+<script type="text/plain" id="efbp-demo"># EFB Preview Demo
+
+This demo shows every Fenix extension. Open your own document with **Open file** or **Open folder**, or serve the folder for live reload. {.cyan}
+
+::: collapse open COCKPIT PREPARATION
+::: normal-checklist
+GEAR PINS & COVERS ..... REMOVED
+FUEL QUANTITY ..... _____ KG
+SEAT BELTS ..... ON
+ADIRS ..... NAV
+BARO REF ..... _____ (BOTH)
+:::
+:::
+
+::: collapse BEFORE START
+::: normal-checklist
+PARKING BRAKE ..... SET
+BEACON ..... ON
+:::
+:::
+
+## Unreliable speed {#unrel}
+
+::: checklist
+ADR 1(2)(3) P/B ..... OFF
+:::
+
+::: if IF ICING EXPECTED:
+    ::: checklist
+    ADR 2(3) P/B ..... OFF
+    UNREL SPD PROC ..... APPLY
+    :::
+    _Be prepared to use the UNRELIABLE SPEED INDICATION procedure._
+    ::: if IF SPEED STILL UNRELIABLE:
+        ::: checklist
+        AP ..... OFF
+        :::
+    :::
+:::
+
+# BEFORE TAKEOFF
+
+::: checklist-table
+| PF | PM |
+|----|----|
+| FLIGHT CONTROLS ..... CHECKED | FLIGHT CONTROLS ..... CHECKED |
+| T.O RWY ..... CONFIRM | TCAS ..... TA/RA |
+:::
+
+# ENG 1 FIRE {.red}
+
+Land at the nearest suitable airport. {.amber}
+
+Consider [LAND ASAP]{.amber} and notify ATC. **[MAYDAY]{.red}** – combine with bold by wrapping it.
+
+Aircraft: {{ aircraft_type }}, engines: {{ engine_type }}.
+
+{{ if engine_type == "Cfm56" }}
+Engine start sequence for **CFM** engines. {.green}
+{{ else }}
+Engine start sequence for **IAE** engines. {.green}
+{{ end }}
+
+See [Unreliable speed](#unrel).
+
+> Perform from memory.
+
+1. Discharge the agent
+2. Switch the APU MASTER SW off
+    - _Check the APU FIRE light extinguishes._
+
+~~Old item~~ ==Updated item==
+
+| Phase | Action |
+|-------|--------|
+| Before start | Brief the departure<br>Set the FCU |
+| After start | Check ECAM status |
+
+<!-- Hidden note: not shown in the app -->
+</script>
+
+<script>
+"use strict";
+(() => {
+const $ = (s) => document.querySelector(s);
+const docEl = $("#efbp-doc"), mainEl = $("#efbp-main"), tocEl = $("#efbp-toc");
+const POLL_MS = 1000;
+const VARS = ["aircraft_type", "engine_type"];
+const COLORS = { amber: "c-amber", caution: "c-amber", red: "c-red", warning: "c-red", green: "c-green", cyan: "c-cyan", info: "c-cyan", center: "center" };
+
+const S = {
+  source: null, docPath: null,
+  vars: { aircraft_type: "A320", engine_type: "Cfm56" },
+  checked: new Set(), open: new Map(),
+  lastKey: null, problems: [], ids: new Set(),
+};
+
+/* ---------------- helpers ---------------- */
+const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const el = (tag, cls) => { const e = document.createElement(tag); if (cls) e.className = cls; return e; };
+const dirname = (p) => { const i = p.lastIndexOf("/"); return i < 0 ? "" : p.slice(0, i); };
+function normPath(p) { const out = []; for (const s of p.split("/")) { if (!s || s === ".") continue; if (s === "..") out.pop(); else out.push(s); } return out.join("/"); }
+const joinPath = (dir, rel) => normPath((dir ? dir + "/" : "") + rel);
+const encodePath = (p) => p.split("/").map(encodeURIComponent).join("/");
+function cleanTarget(t) { t = t.trim(); if (t.startsWith("<") && t.endsWith(">")) t = t.slice(1, -1); try { t = decodeURIComponent(t); } catch { /* keep raw */ } return t; }
+const isExternal = (t) => /^[a-z][a-z0-9+.-]*:/i.test(t) || t.startsWith("//");
+function resolveFromDoc(t) { return t.startsWith("/") ? normPath(t.slice(1)) : joinPath(dirname(S.docPath || ""), t); }
+function problem(n, msg, level = "warn") {
+  if (S.problems.some((p) => p.n === n && p.msg === msg)) return;
+  S.problems.push({ n, msg, level });
+}
+let toastTimer;
+function toast(msg) { const t = $("#efbp-toast"); t.textContent = msg; t.hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => (t.hidden = true), 3500); }
+
+/* ---------------- sources ---------------- */
+class HttpSource {
+  constructor(base) { this.base = base; this.kind = "http"; this.live = true; this.label = "localhost"; }
+  async read(p) { const r = await fetch(this.base + encodePath(p), { cache: "no-store" }); if (!r.ok) throw new Error(`HTTP ${r.status} for ${p}`); return r.text(); }
+  async url(p) { return this.base + encodePath(p); }
+  async list() { return null; }
+}
+class DirSource {
+  constructor(h) { this.h = h; this.kind = "dir"; this.live = true; this.label = h.name; this.blobs = new Map(); }
+  async handle(p) { const parts = normPath(p).split("/"); let d = this.h; for (let i = 0; i < parts.length - 1; i++) d = await d.getDirectoryHandle(parts[i]); return d.getFileHandle(parts[parts.length - 1]); }
+  async read(p) { return (await (await this.handle(p)).getFile()).text(); }
+  async url(p) {
+    const f = await (await this.handle(p)).getFile();
+    const c = this.blobs.get(p);
+    if (c && c.lm === f.lastModified) return c.url;
+    if (c) URL.revokeObjectURL(c.url);
+    const url = URL.createObjectURL(f); this.blobs.set(p, { lm: f.lastModified, url }); return url;
+  }
+  async list() {
+    const out = [];
+    const walk = async (dir, prefix) => {
+      const entries = [];
+      for await (const [name, h] of dir.entries()) entries.push([name, h]);
+      await sortWithOrder(entries, async (h) => (await h.getFile()).text());
+      for (const [name, h] of entries) {
+        if (name.startsWith(".")) continue;
+        if (h.kind === "directory") await walk(h, prefix + name + "/");
+        else if (/\.(md|pdf)$/i.test(name)) out.push(prefix + name);
+      }
+    };
+    await walk(this.h, "");
+    return out;
+  }
+}
+class FilesSource { // <input webkitdirectory> fallback: static snapshot of a folder
+  constructor(files) {
+    this.kind = "files"; this.live = false; this.map = new Map(); this.blobs = new Map();
+    for (const f of files) { const rel = f.webkitRelativePath.split("/").slice(1).join("/"); this.map.set(rel, f); }
+    this.label = files[0] ? files[0].webkitRelativePath.split("/")[0] : "folder";
+  }
+  file(p) { const f = this.map.get(normPath(p)); if (!f) throw new Error(`File not found: ${p}`); return f; }
+  async read(p) { return this.file(p).text(); }
+  async url(p) { const k = normPath(p); if (!this.blobs.has(k)) this.blobs.set(k, URL.createObjectURL(this.file(k))); return this.blobs.get(k); }
+  async list() {
+    const paths = [...this.map.keys()].filter((p) => /\.(md|pdf)$/i.test(p) && !p.split("/").some((s) => s.startsWith(".")));
+    const orders = new Map();
+    for (const [p, f] of this.map) if (p.split("/").pop() === ".order") orders.set(dirname(p), (await f.text()));
+    return sortPaths(paths, orders);
+  }
+}
+class FileSource {
+  constructor(fileOrHandle) {
+    this.kind = "file"; this.isHandle = typeof fileOrHandle.getFile === "function";
+    this.src = fileOrHandle; this.name = fileOrHandle.name; this.label = this.name; this.live = this.isHandle;
+  }
+  async read(p) {
+    if (p !== this.name) throw new Error(`Only the opened file is available here. Use Open folder (or serve the folder) to resolve includes, links and images.`);
+    return this.isHandle ? (await this.src.getFile()).text() : this.src.text();
+  }
+  async url() { throw new Error("Images need Open folder or a served folder"); }
+  async list() { return null; }
+}
+class MemorySource {
+  constructor(files) { this.files = files; this.kind = "memory"; this.live = false; this.label = "Demo"; }
+  async read(p) { if (!(p in this.files)) throw new Error(`File not found: ${p}`); return this.files[p]; }
+  async url() { throw new Error("No images in the demo"); }
+  async list() { return null; }
+}
+function parseOrder(text) { return text.split(/\r?\n/).map((s) => s.trim()).filter((s) => s && !s.startsWith("#")); }
+function rankIn(order, name) { const base = name.replace(/\.(md|pdf)$/i, ""); const k = order.findIndex((o) => o === name || o === base); return k < 0 ? Infinity : k; }
+async function sortWithOrder(entries, readText) {
+  const of = entries.find(([n, h]) => n === ".order" && h.kind === "file");
+  const order = of ? parseOrder(await readText(of[1])) : [];
+  entries.sort((a, b) => (rankIn(order, a[0]) - rankIn(order, b[0])) || a[0].localeCompare(b[0], undefined, { sensitivity: "base" }));
+}
+function sortPaths(paths, orders) {
+  const cmp = (a, b) => {
+    const pa = a.split("/"), pb = b.split("/");
+    for (let i = 0; i < Math.min(pa.length, pb.length); i++) {
+      if (pa[i] === pb[i]) continue;
+      const order = parseOrder(orders.get(pa.slice(0, i).join("/")) || "");
+      return (rankIn(order, pa[i]) - rankIn(order, pb[i])) || pa[i].localeCompare(pb[i], undefined, { sensitivity: "base" });
+    }
+    return pa.length - pb.length;
+  };
+  return paths.sort(cmp);
+}
+
+/* ---------------- template ({{ }}) ---------------- */
+function evalCond(expr, where) {
+  const ors = expr.split("||");
+  return ors.some((part) => part.split("&&").every((term) => {
+    const m = term.trim().match(/^([A-Za-z_][\w]*)\s*(==|!=)\s*"([^"]*)"$/);
+    if (!m) throw new Error(`${where}: can't understand the condition "${term.trim()}". Use e.g. aircraft_type == "A320" (values in double quotes).`);
+    if (!VARS.includes(m[1])) throw new Error(`${where}: unknown variable "${m[1]}". Valid variables: ${VARS.join(", ")}.`);
+    const eq = S.vars[m[1]] === m[3];
+    return m[2] === "==" ? eq : !eq;
+  }));
+}
+function rebaseImages(text, incPath) {
+  const dir = dirname(incPath);
+  return text.replace(/!\[([^\]]*)\]\((<[^>]*>|[^)\s]+)\)/g, (m, alt, t) => {
+    const c = cleanTarget(t);
+    if (isExternal(c) || c.startsWith("/")) return m;
+    return `![${alt}](</${joinPath(dir, c)}>)`;
+  });
+}
+async function expand(text, path, depth) {
+  text = text.replace(/\r\n?/g, "\n").replace(/<!--[\s\S]*?-->/g, (m) => m.replace(/[^\n]/g, "")); // hide comments, keep line count
+  text = text.replace(/^[ \t]*(\{\{(?:(?!\}\})[^\n])*\}\})[ \t]*$/gm, "$1\u0001"); // mark tag-only lines
+  const re = /\{\{([\s\S]*?)\}\}\u0001?\n?/g;
+  let out = "", last = 0, m;
+  const stack = [];
+  const active = () => stack.every((s) => s.active);
+  while ((m = re.exec(text))) {
+    const lit = text.slice(last, m.index);
+    if (active()) out += lit;
+    last = re.lastIndex;
+    const tagOnly = m[0].includes("\u0001");
+    if (!tagOnly && m[0].endsWith("\n")) { last--; } // keep newline of inline tags
+    const tag = m[1].trim();
+    const where = `${path}, line ${text.slice(0, m.index).split("\n").length}`;
+    let mm;
+    if ((mm = tag.match(/^if\s+([\s\S]+)$/))) stack.push({ active: evalCond(mm[1], where), elsed: false });
+    else if (tag === "else") {
+      const top = stack[stack.length - 1];
+      if (!top) throw new Error(`${where}: {{ else }} without a matching {{ if }}.`);
+      if (top.elsed) throw new Error(`${where}: more than one {{ else }} in the same {{ if }}.`);
+      top.active = !top.active; top.elsed = true;
+    } else if (tag === "end") {
+      if (!stack.length) throw new Error(`${where}: {{ end }} without a matching {{ if }}.`);
+      stack.pop();
+    } else if ((mm = tag.match(/^include\s+"([^"]+)"$/))) {
+      if (active()) {
+        if (depth > 8) throw new Error(`${where}: includes are nested too deeply (loop?).`);
+        const incPath = normPath(mm[1]);
+        let inc;
+        try { inc = await S.source.read(incPath); } catch (e) { throw new Error(`${where}: could not read included file "${mm[1]}". ${e.message}`); }
+        inc = rebaseImages(await expand(inc, incPath, depth + 1), incPath);
+        out += inc.endsWith("\n") || !tagOnly ? inc : inc + "\n";
+      }
+    } else if (/^[A-Za-z_]\w*$/.test(tag)) {
+      if (!VARS.includes(tag)) throw new Error(`${where}: unknown variable "${tag}". Valid variables: ${VARS.join(", ")}.`);
+      if (active()) out += S.vars[tag];
+    } else throw new Error(`${where}: can't understand "{{ ${tag} }}".`);
+  }
+  if (active()) out += text.slice(last);
+  if (stack.length) throw new Error(`${path}: an {{ if }} is missing its {{ end }}.`);
+  return out;
+}
+
+/* ---------------- block parser (Fenix ::: blocks) ---------------- */
+const OPEN_RE = /^:::\s*([a-z][a-z0-9-]*)(?:\s+(.*))?$/;
+const FENCE_RE = /^(```|~~~)/;
+function dedent(lines) {
+  let min = Infinity;
+  for (const l of lines) if (l.t.trim()) min = Math.min(min, l.t.match(/^ */)[0].length);
+  if (!isFinite(min) || !min) return lines;
+  return lines.map((l) => ({ t: l.t.slice(Math.min(min, l.t.match(/^ */)[0].length)), n: l.n }));
+}
+function parseBlocks(lines) {
+  const nodes = []; let buf = [];
+  const flush = () => { if (buf.length) { nodes.push({ type: "md", lines: buf }); buf = []; } };
+  for (let i = 0; i < lines.length; i++) {
+    const L = lines[i], tr = L.t.trim();
+    const fm = tr.match(FENCE_RE);
+    if (fm) {
+      buf.push(L); i++;
+      while (i < lines.length && !lines[i].t.trim().startsWith(fm[1])) { buf.push(lines[i]); i++; }
+      if (i < lines.length) buf.push(lines[i]);
+      continue;
+    }
+    if (tr.startsWith(":::")) {
+      if (tr === ":::") { problem(L.n, "Closing ::: without a matching block."); continue; }
+      const m = tr.match(OPEN_RE);
+      if (!m) { problem(L.n, `"${tr}" is not a valid block opener (block names are lowercase).`); buf.push(L); continue; }
+      flush();
+      const j = findClose(lines, i, m[1]);
+      nodes.push(makeNode(m[1], (m[2] || "").trim(), dedent(lines.slice(i + 1, j)), L.n));
+      i = j;
+      continue;
+    }
+    buf.push(L);
+  }
+  flush();
+  return nodes;
+}
+function findClose(lines, i, name) { // index of the ::: line that closes the block opened at lines[i]
+  let d = 1, j = i + 1;
+  for (; j < lines.length; j++) {
+    const t = lines[j].t.trim(), f = t.match(FENCE_RE);
+    if (f) { j++; while (j < lines.length && !lines[j].t.trim().startsWith(f[1])) j++; continue; }
+    if (t === ":::") { if (--d === 0) break; } else if (OPEN_RE.test(t)) d++;
+  }
+  if (j >= lines.length) problem(lines[i].n, `"::: ${name}" is never closed with its own ::: line.`);
+  return j;
+}
+function makeNode(name, args, body, n) {
+  switch (name) {
+    case "collapse":
+    case "if": {
+      let open = false, title = args;
+      const om = args.match(/^open(?:\s+(.*))?$/);
+      if (om) { open = true; title = (om[1] || "").trim(); }
+      if (!title) problem(n, `"::: ${name}" has no title.`);
+      return { type: name, open, title, children: parseBlocks(body), n };
+    }
+    case "normal-checklist":
+    case "checklist":
+      return { type: name, items: parseItems(body), n };
+    case "checklist-table":
+      return { type: name, lines: body, n };
+    default:
+      problem(n, `Unknown block "::: ${name}". Valid: collapse, normal-checklist, checklist, if, checklist-table.`);
+      return { type: "unknown", children: parseBlocks(body), n };
+  }
+}
+function splitItem(text, n) {
+  if (/\.{6,}/.test(text)) problem(n, `More than five dots in "${text.trim()}". Use exactly five: ITEM ..... RESPONSE.`);
+  const idx = text.indexOf(".....");
+  if (idx < 0) {
+    if (/(^|\s)\.{2,4}(\s|$)/.test(text)) problem(n, `"${text.trim()}" has too few dots. Use exactly five, or it is shown as a label.`);
+    return null;
+  }
+  const name = text.slice(0, idx).trim(), resp = text.slice(idx).replace(/^\.+/, "").trim();
+  if (!name || !resp) problem(n, `"${text.trim()}" is missing the item or the response.`);
+  return { name, resp };
+}
+function parseItems(lines) {
+  const items = [];
+  for (let i = 0; i < lines.length; i++) {
+    const L = lines[i], t = L.t.trim();
+    if (!t) continue;
+    if (t.startsWith(":::")) { // nested block (e.g. ::: if) shown in place, above the COMPLETE button
+      if (t === ":::") { problem(L.n, "Closing ::: without a matching block."); continue; }
+      const m = t.match(OPEN_RE);
+      if (!m) { problem(L.n, `"${t}" is not a valid block opener (block names are lowercase).`); continue; }
+      const j = findClose(lines, i, m[1]);
+      items.push({ block: makeNode(m[1], (m[2] || "").trim(), dedent(lines.slice(i + 1, j)), L.n) });
+      i = j;
+      continue;
+    }
+    const it = splitItem(t, L.n);
+    items.push(it ? { ...it, n: L.n } : { label: t, n: L.n });
+  }
+  return items;
+}
+
+/* ---------------- markdown ---------------- */
+const LIST_RE = /^(\s*)([-*+]|\d{1,9}[.)])\s+(.*)$/;
+const isBlank = (s) => !s.trim();
+function isTableSep(s) { return s !== undefined && s.includes("-") && /^\s*\|?\s*:?-+:?\s*(\|\s*:?-+:?\s*)*\|?\s*$/.test(s); }
+function splitRow(s) {
+  s = s.trim();
+  if (s.startsWith("|")) s = s.slice(1);
+  if (s.endsWith("|") && !s.endsWith("\\|")) s = s.slice(0, -1);
+  return s.split(/(?<!\\)\|/).map((c) => c.trim().replace(/\\\|/g, "|"));
+}
+function attrs(s) {
+  const m = s.match(/\s*\{((?:\s*[.#][\w-]+)+)\s*\}\s*$/);
+  if (!m) return { text: s, cls: [], id: null };
+  const cls = []; let id = null;
+  for (const tok of m[1].trim().split(/\s+/)) {
+    if (tok[0] === "#") id = tok.slice(1);
+    else if (COLORS[tok.slice(1)]) cls.push(COLORS[tok.slice(1)]);
+    else problem(null, `Unknown style "{${tok}}". Use .amber .caution .red .warning .green .cyan .info or .center.`);
+  }
+  return { text: s.slice(0, m.index), cls, id };
+}
+function startsBlock(l, next) {
+  return FENCE_RE.test(l.trim()) || /^\s{0,3}#{1,6}\s/.test(l) || /^\s*>/.test(l) || LIST_RE.test(l) || (l.includes("|") && isTableSep(next));
+}
+function plain(html) { const t = el("div"); t.innerHTML = html; return t.textContent; }
+function slug(text) { return plain(inline(text)).toLowerCase().replace(/[^\p{L}\p{N}\s-]/gu, "").trim().replace(/\s+/g, "-"); }
+function uniqueId(id) { let u = id, k = 1; while (S.ids.has(u)) u = `${id}-${k++}`; S.ids.add(u); return u; }
+
+function mdBlocks(lines, tight) {
+  let html = "", i = 0;
+  const n = lines.length;
+  while (i < n) {
+    const line = lines[i];
+    if (isBlank(line)) { i++; continue; }
+    let m;
+    if ((m = line.trim().match(FENCE_RE))) {
+      const code = []; i++;
+      while (i < n && !lines[i].trim().startsWith(m[1])) { code.push(lines[i]); i++; }
+      i++;
+      html += `<pre><code>${esc(code.join("\n"))}</code></pre>`;
+      continue;
+    }
+    if ((m = line.match(/^\s{0,3}(#{1,6})\s+(.*)$/))) {
+      const lvl = m[1].length;
+      const a = attrs(m[2].replace(/\s+#+\s*$/, ""));
+      const text = a.text.trim();
+      const id = uniqueId(a.id || slug(text));
+      html += `<h${lvl} id="${esc(id)}"${a.cls.length ? ` class="${a.cls.join(" ")}"` : ""} data-toc="${esc(plain(inline(text)))}">${inline(text)}</h${lvl}>`;
+      i++;
+      continue;
+    }
+    if (line.includes("|") && isTableSep(lines[i + 1])) {
+      const head = splitRow(line), aligns = splitRow(lines[i + 1]).map((c) => c.startsWith(":") && c.endsWith(":") ? "center" : c.endsWith(":") ? "right" : c.startsWith(":") ? "left" : "");
+      i += 2;
+      const rows = [];
+      while (i < n && !isBlank(lines[i]) && lines[i].includes("|")) { rows.push(splitRow(lines[i])); i++; }
+      const al = (k) => aligns[k] ? ` style="text-align:${aligns[k]}"` : "";
+      html += `<table><thead><tr>${head.map((c, k) => `<th${al(k)}>${inline(c)}</th>`).join("")}</tr></thead><tbody>` +
+        rows.map((r) => `<tr>${head.map((_, k) => `<td${al(k)}>${inline(r[k] || "")}</td>`).join("")}</tr>`).join("") + `</tbody></table>`;
+      continue;
+    }
+    if (/^\s*>/.test(line)) {
+      const q = [];
+      while (i < n && !isBlank(lines[i])) { q.push(lines[i].replace(/^\s*>\s?/, "")); i++; }
+      html += `<blockquote>${mdBlocks(q)}</blockquote>`;
+      continue;
+    }
+    if (/^\s*([-*_])(\s*\1){2,}\s*$/.test(line)) { html += "<hr>"; i++; continue; }
+    if (LIST_RE.test(line)) { const r = parseList(lines, i); html += r.html; i = r.i; continue; }
+    const para = [];
+    while (i < n && !isBlank(lines[i]) && (para.length === 0 || !startsBlock(lines[i], lines[i + 1]))) { para.push(lines[i]); i++; }
+    html += renderPara(para, tight);
+  }
+  return html;
+}
+function renderPara(para, tight) {
+  const a = attrs(para[para.length - 1]);
+  para = para.slice(0, -1).concat(a.text);
+  const text = para.map((l, k) => k < para.length - 1 && / {2,}$/.test(l) ? l.trim() + "<br>" : l.trim()).join(" ");
+  const body = inline(text);
+  if (tight && !a.cls.length && !a.id) return body;
+  return `<p${a.id ? ` id="${esc(uniqueId(a.id))}"` : ""}${a.cls.length ? ` class="${a.cls.join(" ")}"` : ""}>${body}</p>`;
+}
+function parseList(lines, i) {
+  const first = lines[i].match(LIST_RE);
+  const base = first[1].length, ordered = /\d/.test(first[2]), start = ordered ? parseInt(first[2], 10) : 1;
+  const items = []; let cur = null, loose = false;
+  while (i < lines.length) {
+    const l = lines[i], m = l.match(LIST_RE);
+    if (m && m[1].length === base && /\d/.test(m[2]) === ordered) { cur = { lines: [m[3]] }; items.push(cur); i++; continue; }
+    if (m && m[1].length < base) break;
+    if (isBlank(l)) {
+      let k = i + 1;
+      while (k < lines.length && isBlank(lines[k])) k++;
+      if (k < lines.length) {
+        const nl = lines[k], nm = nl.match(LIST_RE), ind = nl.match(/^\s*/)[0].length;
+        if (ind > base) { cur.lines.push(""); i = k; continue; }
+        if (nm && nm[1].length === base && /\d/.test(nm[2]) === ordered) { loose = true; i = k; continue; }
+      }
+      break;
+    }
+    const ind = l.match(/^\s*/)[0].length;
+    if (ind > base) { cur.lines.push(l.slice(Math.min(ind, base + 4))); i++; continue; }
+    if (!startsBlock(l, lines[i + 1])) { cur.lines.push(l.trim()); i++; continue; }
+    break;
+  }
+  const tag = ordered ? "ol" : "ul";
+  let html = `<${tag}${ordered && start !== 1 ? ` start="${start}"` : ""}>`;
+  for (const it of items) html += `<li>${mdBlocks(it.lines, !(loose || it.lines.includes("")))}</li>`;
+  return { html: html + `</${tag}>`, i };
+}
+function inline(src) {
+  const st = [];
+  const P = (h) => { st.push(h); return `\u0000${st.length - 1}\u0000`; };
+  let s = String(src);
+  s = s.replace(/(`+)([\s\S]*?[^`])\1(?!`)/g, (m, a, c) => P(`<code>${esc(c.trim())}</code>`));
+  s = s.replace(/<br\s*\/?>/gi, () => P("<br>"));
+  s = s.replace(/!\[([^\]]*)\]\((<[^>]*>|[^)\s]+)\)/g, (m, alt, t) => P(imgHtml(alt, t)));
+  s = s.replace(/\[([^\]]+)\]\((<[^>]*>|[^)\s]+)\)/g, (m, txt, t) => P(linkHtml(txt, t)));
+  s = s.replace(/\[([^\]]+)\]\{\s*\.([\w-]+)\s*\}/g, (m, txt, c) => P(`<span class="${COLORS[c] || ""}">${inline(txt)}</span>`));
+  s = esc(s);
+  s = s.replace(/\*\*(?=[^\s*])([\s\S]*?[^\s*])\*\*/g, "<strong>$1</strong>");
+  s = s.replace(/__(?=[^\s_])([\s\S]*?[^\s_])__/g, "<strong>$1</strong>");
+  s = s.replace(/(^|[^\w*])\*(?=[^\s*])([\s\S]*?[^\s*])\*(?!\w)/g, "$1<em>$2</em>");
+  s = s.replace(/(^|[^\w])_(?=[^\s_])([\s\S]*?[^\s_])_(?!\w)/g, "$1<em>$2</em>");
+  s = s.replace(/~~(?=\S)([\s\S]*?\S)~~/g, "<del>$1</del>");
+  s = s.replace(/==(?=\S)([\s\S]*?\S)==/g, "<mark>$1</mark>");
+  while (/\u0000\d+\u0000/.test(s)) s = s.replace(/\u0000(\d+)\u0000/g, (m, k) => st[+k]);
+  return s;
+}
+function imgHtml(alt, t) {
+  const c = cleanTarget(t);
+  if (isExternal(c)) { problem(null, `Images from the internet are not displayed: ${c}`, "info"); return `<span class="img-alt">${esc(alt)}</span>`; }
+  return `<img data-src="${esc(resolveFromDoc(c))}" alt="${esc(alt)}">`;
+}
+function linkHtml(txt, t) {
+  const raw = t.replace(/^<|>$/g, "");
+  if (isExternal(raw)) { problem(null, `Links to websites are shown as plain text: ${raw}`, "info"); return inline(txt); }
+  if (raw.startsWith("#")) return `<a href="#${esc(raw.slice(1))}" data-anchor="${esc(raw.slice(1))}">${inline(txt)}</a>`;
+  const h = raw.indexOf("#");
+  const path = resolveFromDoc(cleanTarget(h < 0 ? raw : raw.slice(0, h)));
+  const anchor = h < 0 ? "" : raw.slice(h + 1);
+  return `<a href="#" data-doc="${esc(path)}" data-anchor="${esc(anchor)}">${inline(txt)}</a>`;
+}
+
+/* ---------------- rendering ---------------- */
+const keyOf = (p) => `${S.docPath}|${p}`;
+function isOpen(key, def) { return S.open.has(key) ? S.open.get(key) : def; }
+function setOpen(box, open) {
+  box.classList.toggle("open", open);
+  box.firstElementChild.setAttribute("aria-expanded", String(open));
+  S.open.set(box.dataset.key, open);
+}
+function renderNodes(nodes, parent, path, ifDepth) {
+  nodes.forEach((nd, i) => {
+    const p = `${path}.${i}`;
+    if (nd.type === "md") {
+      const t = document.createElement("template");
+      t.innerHTML = mdBlocks(nd.lines.map((l) => l.t));
+      parent.append(t.content);
+    } else if (nd.type === "collapse") parent.append(renderCollapse(nd, p, ifDepth));
+    else if (nd.type === "if") parent.append(renderBranch(nd, p, ifDepth + 1));
+    else if (nd.type === "normal-checklist" || nd.type === "checklist") parent.append(renderChecklist(nd, p, ifDepth));
+    else if (nd.type === "checklist-table") parent.append(renderClTable(nd, p));
+    else renderNodes(nd.children, parent, p, ifDepth);
+  });
+}
+function renderCollapse(nd, p, ifDepth) {
+  const box = el("section", "col"); box.dataset.key = keyOf(p);
+  const head = el("button", "col-head"); head.type = "button";
+  head.innerHTML = `<span>${inline(nd.title)}</span><span class="tri" aria-hidden="true"></span>`;
+  const body = el("div", "col-body");
+  renderNodes(nd.children, body, p, ifDepth);
+  box.append(head, body);
+  setOpen(box, isOpen(box.dataset.key, nd.open));
+  head.addEventListener("click", () => setOpen(box, !box.classList.contains("open")));
+  return box;
+}
+function renderBranch(nd, p, depth) {
+  const box = el("div", `br ${depth > 1 ? "lvl2" : "lvl1"}`); box.dataset.key = keyOf(p);
+  const head = el("button", "br-head"); head.type = "button";
+  head.innerHTML = `<span class="br-mark" aria-hidden="true"><span class="br-tri"></span></span><span>${inline(nd.title)}</span>`;
+  const body = el("div", "br-body");
+  renderNodes(nd.children, body, p, depth);
+  box.append(head, body);
+  setOpen(box, isOpen(box.dataset.key, nd.open));
+  head.addEventListener("click", () => setOpen(box, !box.classList.contains("open")));
+  return box;
+}
+function makeItem(it, key, extraCls) {
+  const d = el("div", "item" + (extraCls ? " " + extraCls : ""));
+  d.tabIndex = 0; d.setAttribute("role", "checkbox"); d.dataset.key = key;
+  d.innerHTML = `<span class="i-name">${inline(it.name)}</span><span class="i-colon">:</span><span class="i-dots" aria-hidden="true"></span><span class="i-resp">${inline(it.resp)}</span>`;
+  applyItem(d);
+  return d;
+}
+function applyItem(d) { const on = S.checked.has(d.dataset.key); d.classList.toggle("checked", on); d.setAttribute("aria-checked", String(on)); }
+function setItems(items, on) { for (const d of items) { on ? S.checked.add(d.dataset.key) : S.checked.delete(d.dataset.key); applyItem(d); } updateBranches(); }
+function renderChecklist(nd, p, ifDepth) {
+  const normal = nd.type === "normal-checklist";
+  const box = el("div", `cl ${normal ? "normal" : "eqrh"}`);
+  nd.items.forEach((it, j) => {
+    if (it.block) renderNodes([it.block], box, `${p}.${j}`, ifDepth);
+    else if (it.label) { const l = el("div", "cl-label"); l.innerHTML = inline(it.label); box.append(l); }
+    else box.append(makeItem(it, keyOf(`${p}.${j}`)));
+  });
+  if (normal) {
+    const b = el("button", "complete"); b.type = "button"; b.textContent = "COMPLETE";
+    // checks this list's own items; items inside a nested IF branch are left to the pilot
+    b.addEventListener("click", () => setItems(box.querySelectorAll(":scope > .item"), true));
+    box.append(b);
+  }
+  return box;
+}
+function renderClTable(nd, p) {
+  const rows = nd.lines.filter((l) => l.t.trim());
+  if (rows.length < 2 || !isTableSep(rows[1].t)) {
+    problem(nd.n, "::: checklist-table must contain a Markdown table (header row, then a |---| line).");
+    const t = document.createElement("template"); t.innerHTML = mdBlocks(nd.lines.map((l) => l.t));
+    const f = el("div"); f.append(t.content); return f;
+  }
+  const head = splitRow(rows[0].t);
+  const table = el("table", "cltable");
+  table.innerHTML = `<thead><tr>${head.map((c) => `<th>${inline(c)}</th>`).join("")}</tr></thead>`;
+  const tb = el("tbody");
+  rows.slice(2).forEach((r, ri) => {
+    const cells = splitRow(r.t), tr = el("tr");
+    head.forEach((_, ci) => {
+      const td = el("td"), c = cells[ci] || "";
+      const it = c.includes(".....") ? splitItem(c, r.n) : null;
+      if (it) td.append(makeItem(it, keyOf(`${p}.r${ri}c${ci}`), "table-item"));
+      else td.innerHTML = inline(c);
+      tr.append(td);
+    });
+    tb.append(tr);
+  });
+  table.append(tb);
+  const wrap = el("div", "cltable-wrap"); wrap.append(table);
+  return wrap;
+}
+function addH1Complete(root) {
+  let h1 = null, group = [];
+  const finish = () => {
+    if (!h1 || !group.some((e) => e.matches(".cltable-wrap") || e.querySelector(".cltable-wrap"))) return;
+    const items = group.flatMap((e) => [...(e.matches(".item") ? [e] : []), ...e.querySelectorAll(".item")]);
+    const b = el("button", "complete"); b.type = "button"; b.textContent = "COMPLETE";
+    b.addEventListener("click", () => setItems(items, true));
+    h1.classList.add("has-complete"); h1.append(b);
+  };
+  for (const k of [...root.children]) { if (k.tagName === "H1") { finish(); h1 = k; group = []; } else group.push(k); }
+  finish();
+}
+function updateBranches() {
+  docEl.querySelectorAll(".br").forEach((b) => b.classList.toggle("followed", !!b.querySelector(":scope > .br-body .item.checked")));
+}
+function resolveImages(root) {
+  root.querySelectorAll("img[data-src]").forEach((img) => {
+    const fail = () => { const s = el("span", "img-alt"); s.textContent = img.alt || img.dataset.src; img.replaceWith(s); problem(null, `Image not found: ${img.dataset.src}`); renderProblems(); };
+    img.addEventListener("error", fail, { once: true });
+    S.source.url(img.dataset.src).then((u) => (img.src = u), fail);
+  });
+}
+function buildToc(root) {
+  const hs = [...root.querySelectorAll("h1,h2,h3,h4,h5,h6")];
+  tocEl.hidden = !hs.length;
+  tocEl.innerHTML = "<h2>ON THIS PAGE</h2>";
+  for (const h of hs) {
+    const a = el("a"); a.href = "#" + h.id; a.textContent = h.dataset.toc || h.textContent;
+    a.style.paddingLeft = (+h.tagName[1] - 1) * 10 + "px";
+    a.addEventListener("click", (e) => { e.preventDefault(); goAnchor(h.id); });
+    tocEl.append(a);
+  }
+}
+function render(text) {
+  S.problems = []; S.ids = new Set();
+  const lines = text.split("\n").map((t, i) => ({ t: t.replace(/\t/g, "    "), n: i + 1 }));
+  const nodes = parseBlocks(lines);
+  const root = el("div", "doc");
+  renderNodes(nodes, root, "r", 0);
+  addH1Complete(root);
+  const scroll = mainEl.scrollTop;
+  docEl.replaceChildren(root);
+  mainEl.scrollTop = scroll;
+  updateBranches();
+  buildToc(root);
+  resolveImages(root);
+  renderProblems();
+}
+function showError(title, msg) {
+  S.problems = []; renderProblems(); tocEl.hidden = true;
+  docEl.innerHTML = `<div class="err"><h2>${esc(title)}</h2><pre>${esc(msg)}</pre></div>`;
+}
+function renderProblems() {
+  const btn = $("#efbp-probs"), panel = $("#efbp-problems");
+  const n = S.problems.length;
+  btn.hidden = !n; btn.textContent = `Problems (${n})`; btn.classList.toggle("warn", S.problems.some((p) => p.level === "warn"));
+  if (!n) { panel.hidden = true; return; }
+  panel.innerHTML = `<h2><span>PROBLEMS</span><button class="tb-btn" type="button" id="efbp-probs-close">Close</button></h2><ul>` +
+    S.problems.map((p) => `<li><span class="ln">${p.n ? "line " + p.n : "—"}</span><span class="${p.level}">${esc(p.msg)}</span></li>`).join("") + "</ul>";
+  $("#efbp-probs-close").onclick = () => (panel.hidden = true);
+}
+
+/* ---------------- navigation ---------------- */
+function goAnchor(id) {
+  const t = docEl.querySelector(`[id="${CSS.escape(id)}"]`);
+  if (!t) { toast(`No heading with the ID "${id}"`); return; }
+  for (let e = t.parentElement; e && e !== docEl; e = e.parentElement) if (e.matches(".col,.br")) setOpen(e, true);
+  t.scrollIntoView({ behavior: "smooth", block: "start" });
+  t.classList.remove("flash-target"); void t.offsetWidth; t.classList.add("flash-target");
+}
+docEl.addEventListener("click", async (e) => {
+  const a = e.target.closest("a");
+  if (a && docEl.contains(a)) {
+    e.preventDefault();
+    if (a.dataset.doc) await openDocPath(a.dataset.doc, a.dataset.anchor);
+    else if (a.dataset.anchor) goAnchor(a.dataset.anchor);
+    return;
+  }
+  const item = e.target.closest(".item");
+  if (item) setItems([item], !S.checked.has(item.dataset.key));
+});
+docEl.addEventListener("keydown", (e) => {
+  const item = e.target.closest && e.target.closest(".item");
+  if (item && (e.key === " " || e.key === "Enter")) { e.preventDefault(); setItems([item], !S.checked.has(item.dataset.key)); }
+});
+
+/* ---------------- loading & live reload ---------------- */
+let busy = false;
+async function refresh(force) {
+  if (busy || !S.source || !S.docPath) return;
+  busy = true;
+  try {
+    let raw;
+    try { raw = await S.source.read(S.docPath); }
+    catch (e) { const k = "R:" + e.message; if (force || k !== S.lastKey) { S.lastKey = k; showError(`Could not read "${S.docPath}"`, e.message); } return; }
+    let out, err = null;
+    try { out = await expand(raw, S.docPath, 0); } catch (e) { err = e.message; }
+    const key = `${S.docPath}|${err ? "E:" + err : "T:" + out}`;
+    if (!force && key === S.lastKey) return;
+    const reloaded = S.lastKey !== null && !force;
+    S.lastKey = key;
+    if (err) showError("This document could not be opened", err); else render(out);
+    if (reloaded) { const d = $("#efbp-dot"); d.classList.remove("flash"); void d.offsetWidth; d.classList.add("flash"); }
+    setStatus();
+  } finally { busy = false; }
+}
+function setStatus() {
+  const live = S.source && S.source.live;
+  $("#efbp-dot").classList.toggle("live", !!live);
+  const where = S.source.kind === "http" ? "served" : S.source.label;
+  $("#efbp-status-text").textContent = `${S.docPath} · ${where} · ${live ? "reloads on save" : "static (re-open to refresh)"}`;
+}
+async function setSource(src, docPath, anchor) {
+  S.source = src; S.lastKey = null;
+  const sel = $("#efbp-docs");
+  const list = await src.list().catch(() => null);
+  if (list && list.length) {
+    sel.innerHTML = list.map((p) => `<option value="${esc(p)}">${esc(p)}</option>`).join("");
+    sel.hidden = false;
+    if (!docPath) docPath = list.find((p) => /(^|\/)sop\.md$/i.test(p)) || list.find((p) => /\.md$/i.test(p));
+  } else sel.hidden = true;
+  if (!docPath) { showError("No Markdown documents found", "The folder has no .md files."); return; }
+  await openDocPath(docPath, anchor, true);
+}
+async function openDocPath(path, anchor, initial) {
+  if (/\.pdf$/i.test(path)) {
+    try { window.open(await S.source.url(path), "_blank", "noopener"); } catch { toast("PDFs can be opened from a folder or a served folder."); }
+    if (!initial) return;
+  }
+  if (!initial && S.source.kind === "file" && path !== S.docPath) { toast("Use Open folder (or serve the folder) to follow links between documents."); return; }
+  if (!initial && S.source.kind === "memory") { toast("Links to other documents work when a folder is open."); return; }
+  const changed = path !== S.docPath;
+  S.docPath = path; S.lastKey = null;
+  const sel = $("#efbp-docs"); if (!sel.hidden) sel.value = path;
+  if (S.source.kind === "http") { const u = new URL(location.href); u.searchParams.set("doc", path); history.replaceState(null, "", u); }
+  if (changed) mainEl.scrollTop = 0;
+  await refresh(true);
+  if (anchor) goAnchor(anchor);
+}
+setInterval(() => { if (S.source && S.source.live && document.visibilityState === "visible") refresh(false); }, POLL_MS);
+document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") refresh(false); });
+
+/* ---------------- toolbar ---------------- */
+$("#efbp-docs").addEventListener("change", (e) => openDocPath(e.target.value));
+$("#efbp-ac").addEventListener("change", (e) => { S.vars.aircraft_type = e.target.value; refresh(true); });
+$("#efbp-eng").addEventListener("change", (e) => { S.vars.engine_type = e.target.value; refresh(true); });
+$("#efbp-expand").addEventListener("click", () => docEl.querySelectorAll(".col,.br").forEach((b) => setOpen(b, true)));
+$("#efbp-collapse").addEventListener("click", () => docEl.querySelectorAll(".col,.br").forEach((b) => setOpen(b, false)));
+$("#efbp-reset").addEventListener("click", () => setItems(docEl.querySelectorAll(".item"), false));
+$("#efbp-probs").addEventListener("click", () => { const p = $("#efbp-problems"); p.hidden = !p.hidden; });
+$("#efbp-open-file").addEventListener("click", async () => {
+  if (window.showOpenFilePicker) {
+    try { const [h] = await window.showOpenFilePicker({ types: [{ description: "Markdown", accept: { "text/markdown": [".md"] } }] }); S.docPath = null; await setSource(new FileSource(h), h.name); } catch { /* cancelled */ }
+  } else $("#efbp-file-input").click();
+});
+$("#efbp-file-input").addEventListener("change", async (e) => { const f = e.target.files[0]; if (f) { S.docPath = null; await setSource(new FileSource(f), f.name); } e.target.value = ""; });
+$("#efbp-open-dir").addEventListener("click", async () => {
+  if (window.showDirectoryPicker) {
+    try { const h = await window.showDirectoryPicker(); S.docPath = null; await setSource(new DirSource(h)); } catch { /* cancelled */ }
+  } else $("#efbp-dir-input").click();
+});
+$("#efbp-dir-input").addEventListener("change", async (e) => { if (e.target.files.length) { S.docPath = null; await setSource(new FilesSource([...e.target.files])); } e.target.value = ""; });
+
+/* drag and drop */
+let dragDepth = 0;
+window.addEventListener("dragenter", (e) => { e.preventDefault(); dragDepth++; $("#efbp-drop").hidden = false; });
+window.addEventListener("dragleave", () => { if (--dragDepth <= 0) { dragDepth = 0; $("#efbp-drop").hidden = true; } });
+window.addEventListener("dragover", (e) => e.preventDefault());
+window.addEventListener("drop", async (e) => {
+  e.preventDefault(); dragDepth = 0; $("#efbp-drop").hidden = true;
+  const item = e.dataTransfer.items && e.dataTransfer.items[0];
+  if (item && item.getAsFileSystemHandle) {
+    const h = await item.getAsFileSystemHandle();
+    if (h) { S.docPath = null; if (h.kind === "directory") await setSource(new DirSource(h)); else await setSource(new FileSource(h), h.name); return; }
+  }
+  const f = e.dataTransfer.files[0];
+  if (f) { S.docPath = null; await setSource(new FileSource(f), f.name); }
+});
+
+/* ---------------- start ---------------- */
+function showWelcome() {
+  tocEl.hidden = true;
+  $("#efbp-status-text").textContent = "No document";
+  docEl.innerHTML = `<div class="welcome">
+    <h1>EFB document preview</h1>
+    <p>Renders Fenix EFB Markdown (collapsible sections, normal and eQRH checklists, IF branches, checklist tables, colours, aircraft conditions and includes) the way the EFB shows it.</p>
+    <p><strong>Reload on save:</strong> serve the documents folder and open the page from there. The page checks the file every second and re-renders when you save it, keeping your checks and open sections.</p>
+    <pre>cd ~/Documents/a320-documents
+python3 -m http.server 8000
+# then open http://localhost:8000/efb-preview.html?doc=sop.md</pre>
+    <p>Without a server: <strong>Open folder</strong> or drop a folder here. In Chrome and Edge this also reloads on save; in Firefox it shows a snapshot.</p>
+    <p><button class="tb-btn" type="button" id="efbp-demo-btn">Load demo document</button></p>
+  </div>`;
+  $("#efbp-demo-btn").onclick = () => { S.docPath = null; setSource(new MemorySource({ "Demo.md": $("#efbp-demo").textContent.replace(/^\n/, "") }), "Demo.md"); };
+}
+(async () => {
+  if (location.protocol.startsWith("http")) {
+    const src = new HttpSource(new URL(".", location.href).href);
+    const doc = new URLSearchParams(location.search).get("doc") || "sop.md";
+    const hash = location.hash ? decodeURIComponent(location.hash.slice(1)) : "";
+    try { await src.read(doc); await setSource(src, doc, hash || undefined); return; } catch { /* fall through */ }
+  }
+  showWelcome();
+})();
+})();
+</script>
+</body>
+</html>
