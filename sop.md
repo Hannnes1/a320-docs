@@ -317,3 +317,33 @@ FLIGHT PROGRESS ..... MONITOR
 TOP OF DECENT ..... VERIFY
 :::
 :::
+
+::: collapse DESCENT PREPARATION
+::: normal-checklist
+WEATHER AND LANDING INFORMATION ..... OBTAIN
+NAV CHARTS ..... PREPARE
+LANDING PERFORMANCE ..... COMPUTE
+
+FMGC
+ARRIVAL ..... INSERT/VERIFY
+DES WIND ..... VERIFY
+PERF CRUISE ..... VERIFY
+PREF DES ..... VERIFY
+PERF APPR ..... VERIFY
+PERF GO-AROUND ..... VERIFY
+
+GPWS
+LDG FLAP 3 ..... AS REQ
+_Must be on if landing with FLAP 3 configuration._
+
+ECAM
+LDG ELEV ..... VERIFY
+_Ensure that the LDG ELEV AUTO displays in green on the ECAM CRUISE page and verify the associated value._
+
+AUTO BRAKE
+AUTO BRK ..... AS REQ
+_Set to previously calculated value._
+
+TODO: Slutför DESCENT PREPARATION
+:::
+:::
