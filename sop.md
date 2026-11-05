@@ -1,4 +1,4 @@
-# Custom SOP
+# A320 SOP
 
 ::: collapse PRELIMINARY COCKPIT PREPARATION
 ::: normal-checklist

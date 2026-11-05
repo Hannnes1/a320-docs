@@ -1,0 +1,35 @@
+name: Build PDFs
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  pdf:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+
+      # Same font as the local builds (Roboto), so line widths, and thus the wrap check, match.
+      - name: Install fonts
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends fonts-roboto
+
+      - name: Generate PDFs and check line wraps
+        run: |
+          mkdir -p pdf
+          status=0
+          for md in *.md; do
+            [ "$md" = README.md ] && continue
+            echo "::group::$md"
+            node efb-pdf.mjs "$md" -o "pdf/${md%.md}.pdf" --check-wraps || status=1
+            echo "::endgroup::"
+          done
+          exit $status
+
+      - name: Upload PDFs
+        if: always()
+        uses: actions/upload-artifact@v5
+        with:
+          name: pdfs
+          path: pdf/*.pdf
+          if-no-files-found: error
