@@ -3,15 +3,15 @@
 ::: collapse PRELIMINARY COCKPIT PREPARATION
 ::: normal-checklist
 SAFETY CHECK
-THRUST LEVER ..... IDLE
+THRUST LEVERS ..... IDLE
 ENG MASTER 1 + 2 ..... OFF
 ENG MODE ..... NORM
 WX RADAR ..... OFF
 PWS ..... OFF
 RADAR GAIN ..... AUTO/CAL
-RADAR MODE ..... AS RQRD
+RADAR MODE ..... AS REQ
 PARKING BRAKE ..... ON
-LANDING GEAR ..... DOWN
+L/G ..... DOWN
 WIPERS ..... OFF
 
 POWERING UP
@@ -19,26 +19,26 @@ BAT 1 + 2 VOLTAGE ..... VERIFY ABOVE 25.5 V
 BAT 1 + 2 ..... AUTO
 EXT PWR (IF AVAIL) ..... ON
 
-::: if IF BATT BELOW 25.5 V:
+::: if IF BAT BELOW 25.5 V:
     _Charge for 20 minutes and check again._
     ::: checklist
     EXT PWR ..... ON
-    After 20 minutes
-    BATT 1 + 2 ..... OFF
+    _After 20 minutes_
+    BAT 1 + 2 ..... OFF
     BAT 1 + 2 VOLTAGE ..... VERIFY ABOVE 25.5 V
-    BATT 1 + 2 ..... AUTO
+    BAT 1 + 2 ..... AUTO
     :::
 :::
 
 APU FIRE TEST
 APU FIRE ..... IN AND GUARDED
-APU FIRE TEST ..... HOLD
-_Verify that the APU Fire warning is displayed on the ECAM, the APU FIRE pushbutton illuminates in red, the SQUIB and DISCH ligts are on, the master warning light is on, and that there is an audible continuous repetitive chime._
+APU FIRE TEST ..... PRESS & HOLD
+_Verify that the APU Fire warning is displayed on the ECAM, the APU FIRE pushbutton illuminates in red, the SQUIB and DISCH lights are on, the master warning light is on, and that there is an audible continuous repetitive chime._
 
 APU START
 MASTER SW ..... ON
 _Wait for 3 seconds_
-APU START  ..... ON
+APU START ..... ON
 _When APU AVAIL_
 APU BLEED ..... ON
 
@@ -64,29 +64,29 @@ STROBE ..... AUTO
 NAV & LOGO ..... ON
 SEAT BELTS ..... ON
 _Leave SEAT BELTS turned OFF if refueling is in progress._
-NON SMOKING ..... AUTO
+NO SMOKING ..... AUTO
 EMER EXIT LT ..... ARM
-FUEL PUMPS ..... AUTO
+FUEL PUMPS ..... ON
 ALL WHITE LIGHTS ..... VERIFY OFF
 
 ENGINE FIRE TEST
 ENG FIRE 1 + 2 ..... IN AND GUARDED
-ENG FIRE TEST 1 + 2 ..... HOLD
+ENG FIRE TEST 1 + 2 ..... PRESS & HOLD
 
 CENTER INSTRUMENT PANEL
 ISIS ..... VERIFY
-CLOCK ..... VERIFY / SET
+CLOCK ..... VERIFY/SET
 A/SKID & N/W STRG ..... ON
 
 PEDESTAL
 VHF1 ..... SELECTED
-VHF1 + INT + CAB + PA ..... OUT / VERIFY VOLUME
+VHF1 + INT + CAB + PA ..... OUT/VERIFY VOLUME
 THRUST LEVERS ..... IDLE
 ENG MASTER 1 + 2 ..... OFF
 ENG MODE ..... NORM
-GROUND SPOILER ..... RETRACT/DISARM
+GROUND SPOILERS ..... RETRACT/DISARM
 FLAPS ..... UP
-RUD TRIM ..... ZERO
+RUDDER TRIM ..... ZERO
 PARKING BRAKE ..... ON
 GRAVITY GEAR EXTN ..... VERIFY STOWED
 
@@ -134,7 +134,7 @@ OXYGEN MASK TEST ..... PRESS
 _Check for yellow cross to verify oxygen mask is working._
 
 TRANSPONDER
-SQUAK CODE ..... SET
+SQUAWK CODE ..... SET
 TCAS ..... STBY
 
 CHECKLIST
@@ -151,20 +151,22 @@ EXT PWR ..... OFF & REMOVED
 COCKPIT DOOR ..... CLOSED & LOCKED
 WINDOWS & DOORS ..... CLOSED
 SLIDES ..... ARMED
-ECAM DOOR PAGE ..... CHECK
+ECAM DOOR PAGE ..... VERIFY
 
 ATC CLEARANCE
 PUSHBACK & ENGINE START ..... REQUEST
 
+BEACON ..... ON
+
 ::: if IF PUSHBACK:
     ::: checklist
+    N/W STRG DISC MEMO ..... VERIFY DISPLAYED
     TOW TRUCK ..... CALL
-    PARKING BRAKE ..... OFF 
+    PARKING BRAKE ..... OFF
     :::
 :::
 
-BEACON ..... ON
-THRUST LEVERS ..... CHECK IDLE
+THRUST LEVERS ..... VERIFY IDLE
 
 CHECKLIST
 BEFORE START ..... COMPLETE
@@ -185,14 +187,15 @@ _Wait for engine 2 AVAIL_
 ::: normal-checklist
 ENG MODE ..... NORM
 APU BLEED ..... OFF
-APU MASTER ..... OFF
+APU MASTER SW ..... OFF
 ENG ANTI-ICE ..... AS REQ
 WING ANTI-ICE ..... AS REQ
 GROUND SPOILERS ..... ARM
 RUDDER TRIM ..... ZERO
-FLAPS .....  SET FOR T.O.
+FLAPS ..... SET FOR T.O.
 PITCH TRIM ..... AS REQ
 ECAM STATUS REMINDER ..... VERIFY NOT DISPLAYED
+N/W STRG DISC MEMO ..... VERIFY NOT DISPLAYED
 
 CHECKLIST
 AFTER START ..... COMPLETE
@@ -208,7 +211,7 @@ EXTERIOR LIGHTS
 NOSE ..... TAXI
 RWY TURN OFF ..... AS REQ
 
-::: if WHEN CROSSING RUNWAY
+::: if WHEN CROSSING RUNWAY:
     ::: checklist
     STROBE ..... ON
     :::
@@ -216,7 +219,7 @@ RWY TURN OFF ..... AS REQ
 
 PARKING BRAKE ..... OFF
 BRAKES PRESSURE ..... VERIFY ZERO
-THRUST LEVER ..... AS REQ
+THRUST LEVERS ..... AS REQ
 
 BRAKES
 BRAKE PEDALS ..... PRESS
@@ -227,15 +230,15 @@ FLIGHT CONTROLS ..... VERIFY
 
 WEATHER RADAR
 RADAR ..... ON
-PWS ..... ON
+PWS ..... AUTO
 
 TRANSPONDER
-TCAS ..... TA/RA
+TCAS ..... TA
 
-TERRAIN RADAR
+NAVIGATION DISPLAY
 TERR ON ND ..... AS REQ
 
-AUTOBRAKES
+AUTO BRK
 AUTO BRK MAX ..... SET
 
 FINAL VERIFICATION
@@ -250,17 +253,20 @@ TAXI ..... COMPLETE
 
 ::: collapse LINE UP / TAKEOFF
 ::: normal-checklist
-CLEARANCE
+ATC CLEARANCE
 TAKEOFF ..... REQUEST
 
-EXTERNAL LIGHTS
+EXTERIOR LIGHTS
 STROBE ..... ON
 RWY TURN OFF ..... ON
 LAND ..... ON
-NOSE ..... TO
-BRAKE FANS ..... OFF
+NOSE ..... T.O.
+BRAKE FAN ..... OFF
 PACK 1 + 2 ..... AS REQ
 _Select PACK OFF for more performance._
+
+TRANSPONDER
+TCAS ..... TA/RA
 
 CHECKLIST
 LINE-UP ..... COMPLETE
@@ -273,21 +279,21 @@ BRAKES ..... RELEASE
 THRUST LEVERS ..... TOGA
 AT VR ..... ROTATE
 
-POSITIVE CLIMB
-LANDING GEAR ..... UP
-AUTOPILOT ..... AS REQ
+WHEN POSITIVE CLIMB
+L/G ..... UP
+AP ..... AS REQ
 
-AT THRUST REDUCTION ALT
+@ THRUST REDUCTION ALT
 THRUST LEVERS ..... CL
 PACK 1 + 2 ..... ON
-_Wait at least 10 seconds between turning on PACK 1 and 2. This is for passenger comfort_
+_Wait at least 10 seconds between turning on PACK 1 and 2. This is for passenger comfort._
 
-AT F SPEED
-FLAPS 1 ..... SET
+@ F SPEED
+FLAPS 1 ..... SELECT
 
-AT S SPEED
-FLAPS ..... 0
-GROUND SPOILER ..... DISARM
+@ S SPEED
+FLAPS 0 ..... SELECT
+GROUND SPOILERS ..... DISARM
 :::
 :::
 
@@ -298,14 +304,14 @@ _Turn ON when flying through visible moisture and TAT is at or below 10 °C, exc
 
 WING ANTI-ICE ..... AS REQ
 _Turn ON when visible icing is detected on the visual ice indicator._
-__
 
 @ TRANS ALT
 BARO REF ..... SET STD
 
 @ 10.000 FT / FL100
-LAND LIGHTS ..... OFF
-NOSE LIGTS ..... OFF
+LAND ..... OFF
+NOSE ..... OFF
+RWY TURN OFF ..... OFF
 TERR ON ND ..... OFF
 :::
 :::
@@ -314,7 +320,7 @@ TERR ON ND ..... OFF
 ::: normal-checklist
 ANTI-ICE ..... AS REQ
 FLIGHT PROGRESS ..... MONITOR
-TOP OF DECENT ..... VERIFY
+TOP OF DESCENT ..... VERIFY
 :::
 :::
 
@@ -328,7 +334,7 @@ FMGC
 ARRIVAL ..... INSERT/VERIFY
 DES WIND ..... VERIFY
 PERF CRUISE ..... VERIFY
-PREF DES ..... VERIFY
+PERF DES ..... VERIFY
 PERF APPR ..... VERIFY
 PERF GO-AROUND ..... VERIFY
 
@@ -340,10 +346,219 @@ ECAM
 LDG ELEV ..... VERIFY
 _Ensure that the LDG ELEV AUTO displays in green on the ECAM CRUISE page and verify the associated value._
 
-AUTO BRAKE
+AUTO BRK
 AUTO BRK ..... AS REQ
 _Set to previously calculated value._
 
-TODO: Slutför DESCENT PREPARATION
+NAVIGATION DISPLAY
+TERR ON ND ..... AS REQ
+
+ANTI-ICE
+ENG ANTI-ICE ..... AS REQ
+_Turn ON when flying through visible moisture and TAT is at or below 10 °C, even if SAT is below -40 °C. This ensures a better protection against flame-out._
+
+WING ANTI-ICE ..... AS REQ
+_Turn ON when visible icing is detected on the visual ice indicator._
+
+ATC CLEARANCE
+DESCENT CLEARANCE ..... OBTAIN
+:::
+:::
+
+::: collapse DESCENT
+::: normal-checklist
+DESCENT ..... INITIATE
+
+@ 10.000 FT / FL100
+LAND ..... ON
+SEAT BELTS ..... ON
+EFIS ..... CSTR
+
+LS ..... AS REQ
+_Turn on for ILS approach._
+
+@ TRANS LVL
+BARO REF ..... SET QNH
+
+CHECKLIST
+APPROACH ..... COMPLETE
+:::
+:::
+
+::: collapse APPROACH
+::: normal-checklist
+APPROACH PHASE ..... VERIFY/ACTIVATE
+_When flying in NAV mode, the approach phase is activated at DECEL point automatically. In HDG/TRK mode, it is recommended to activate the approach phase 15 NM from touchdown._
+
+@ GREEN DOT SPEED
+FLAPS 1 ..... SELECT
+_It is recommended to select the FLAPS 1 3 NM before the final descent point. The aircraft should also decelerate. If the aircraft does not decelerate, the flight crew should consider the extension of the landing gear before the extension of speedbrakes. The extension of the speedbrakes at this point will cause an increase in VLS._
+
+INITIAL APPROACH
+APPR ..... PRESS
+_The APPR should be activated when the aircraft is cleared for the approach, the aircraft is on the intercept trajectory for the final approach course and the LOC deviation is available._
+AP 1 + 2 ..... ON
+::: if IF ILS:
+    ::: checklist
+    LOC ..... VERIFY ARMED
+    G/S ..... VERIFY ARMED
+    :::
+:::
+
+BY 2.000 FT AGL
+FLAPS 2 ..... SELECT
+_The flight crew must notice a deceleration toward the F speed. The flight crew should consider extending the landing gear to reduce the airspeed. The use of speedbrakes is not recommended._
+
+AFTER FLAPS 2
+L/G ..... DOWN
+L/G ..... VERIFY DOWN
+AUTO BRK ..... VERIFY
+GROUND SPOILERS ..... ARM
+
+EXTERIOR LIGHTS
+NOSE ..... T.O.
+RWY TURN OFF ..... ON
+
+AFTER L/G DOWN
+FLAPS FULL ..... SELECT
+A/THR ..... VERIFY IN SPEED MODE
+WING ANTI-ICE ..... OFF
+LDG MEMO ..... VERIFY NO BLUE
+
+CHECKLIST
+LANDING ..... COMPLETE
+
+@ MINIMUM
+::: if IF VISUAL REFERENCES SUFFICIENT:
+    ::: checklist
+    AP ..... OFF
+    :::
+:::
+::: if IF VISUAL REFERENCES NOT SUFFICIENT:
+    ::: checklist
+    GO-AROUND ..... INITIATE
+    :::
+:::
+:::
+:::
+
+::: collapse LANDING
+::: normal-checklist
+@ 30 FT
+FLARE ..... PERFORM
+THRUST LEVERS ..... IDLE
+
+@ TOUCHDOWN
+DEROTATION ..... INITIATE
+THRUST LEVERS ..... REV MAX OR REV IDLE
+GROUND SPOILERS ..... VERIFY
+REVERSERS ..... VERIFY
+BRAKES ..... AS REQ
+DECELERATION ..... VERIFY
+
+@ 70 KNOTS
+THRUST LEVERS ..... REV IDLE
+
+@ TAXI SPEED
+REVERSERS ..... STOW
+AUTO BRK ..... DISENGAGE
+:::
+:::
+
+::: collapse GO-AROUND
+::: normal-checklist
+THRUST LEVERS ..... TOGA
+ROTATION ..... PERFORM
+_It is recommended to have an initial rotation to 15°. When getting a positive rate of climb, follow the SRS Flight Director._
+FLAPS ..... AS REQ
+
+WHEN POSITIVE CLIMB
+L/G ..... UP
+NAV OR HDG ..... AS REQ
+AP ..... AS REQ
+
+@ THRUST REDUCTION ALT
+THRUST LEVERS ..... CL
+ALT ..... VERIFY AND PULL
+
+@ F SPEED
+FLAPS 1 ..... SELECT
+
+@ S SPEED
+FLAPS 0 ..... SELECT
+GROUND SPOILERS ..... DISARM
+
+EXTERIOR LIGHTS
+NOSE ..... OFF
+RWY TURN OFF ..... OFF
+LAND ..... AS REQ
+:::
+:::
+
+::: collapse AFTER LANDING
+::: normal-checklist
+GROUND SPOILERS ..... DISARM
+FLAPS ..... RETRACT
+
+EXTERIOR LIGHTS
+LAND ..... RETRACT
+STROBE ..... AUTO
+NOSE ..... TAXI
+RWY TURN OFF ..... AS REQ
+
+WEATHER RADAR
+RADAR ..... OFF
+PWS ..... OFF
+
+TRANSPONDER
+TCAS ..... STBY
+
+POWER
+APU ..... START
+
+BRAKES
+BRAKE FAN ..... AS REQ
+
+ATC CLEARANCE
+TAXI TO GATE ..... REQUEST
+
+CHECKLIST
+AFTER LANDING ..... COMPLETE
+:::
+:::
+
+::: collapse PARKING
+::: normal-checklist
+PARKING BRAKE ..... ON
+ANTI-ICE ..... OFF
+APU BLEED ..... ON
+ENG MASTER 1 + 2 ..... OFF
+SLIDES ..... VERIFY DISARMED
+SEAT BELTS ..... OFF
+BEACON ..... OFF
+EXTERIOR LIGHTS ..... AS REQ
+FUEL PUMPS ..... OFF
+BRAKE FAN ..... OFF
+
+CHECKLIST
+PARKING ..... COMPLETE
+:::
+:::
+
+::: collapse SECURING THE AIRCRAFT
+::: normal-checklist
+PARKING BRAKE ..... ON
+OXYGEN CREW SUPPLY ..... OFF
+ADIRS 1 + 2 + 3 ..... OFF
+EXTERIOR LIGHTS ..... OFF
+APU BLEED ..... OFF
+APU MASTER SW ..... OFF
+EMER EXIT LT ..... OFF
+SIGNS ..... OFF
+EXT PWR ..... AS REQ
+BAT 1 + 2 ..... OFF
+
+CHECKLIST
+SECURING THE AIRCRAFT ..... COMPLETE
 :::
 :::
