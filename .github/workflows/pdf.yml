@@ -4,9 +4,15 @@ on:
   push:
   workflow_dispatch:
 
+# Don't let two pushes publish the release at the same time.
+concurrency:
+  group: pdf-${{ github.ref }}
+
 jobs:
   pdf:
     runs-on: ubuntu-24.04
+    permissions:
+      contents: write # to publish the release
     steps:
       - uses: actions/checkout@v5
 
@@ -33,3 +39,18 @@ jobs:
           name: pdfs
           path: pdf/*.pdf
           if-no-files-found: error
+
+      # On master, replace the "pdf" release with the new PDFs. Stable download links:
+      #   https://github.com/<owner>/<repo>/releases/download/pdf/<name>.pdf
+      # Skipped when the wrap check fails, so the release always holds a clean build.
+      - name: Publish release
+        if: github.ref == 'refs/heads/master'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release delete pdf --cleanup-tag --yes 2>/dev/null || true
+          gh release create pdf pdf/*.pdf \
+            --target "$GITHUB_SHA" \
+            --title "Latest PDFs" \
+            --notes "Built automatically from ${GITHUB_SHA::7} on $(date -u '+%Y-%m-%d %H:%M UTC')." \
+            --latest
